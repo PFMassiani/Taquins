@@ -1,5 +1,6 @@
 package core.grille;
 
+import core.bloc.Rectangle;
 import core.mouvement.Mouvement;
 
 import java.util.List;
@@ -22,5 +23,14 @@ public class Grille {
     public List<Mouvement> resoudre(){
         // TODO
         return null;
+    }
+    public static Grille generer(int nb1x1, int nb1x2, int nb2x1,Difficulte difficulte){
+        Grille grille = new Grille(4,5);
+        Rectangle r1x1 = new Rectangle(1,1),
+                r1x2 = new Rectangle(1,2),
+                r2x1 = new Rectangle(2,1);
+        Rectangle carre = new Rectangle(2,2);
+        // TODO FINIR GÉNÉRER GRILLE
+        return grille;
     }
 }

@@ -10,23 +10,23 @@ import java.util.Set;
 import java.util.Map;
 
 public class Translation extends Mouvement{
+
+    // TODO mise à jout avec le changement de la notion de Bloc
+
     protected Direction direction;
 
-    public Translation(Direction dir,Bloc bloc,Case origineBloc){
-        super(bloc,origineBloc);
+    public Translation(Direction dir,Bloc bloc){
+        super(bloc);
         this.direction = dir;
     }
 
     @Override
     public Map<Case,Bloc> getChangements(){
-        Set<Case> anciennes = bloc.recouvre(origineBloc),
+        Set<Case> anciennes = bloc.recouvre(),
                 occupees = new HashSet<>(anciennes),
                 liberees = new HashSet<>(anciennes);
-        occupees.forEach( (Case c) -> {
-            if(!c.aVoisin(direction))
-                throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
-            c.voisin(direction);
-        });
+    if (!estValide()) throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
+        occupees.forEach( (Case c) -> c.voisin(direction));
         liberees.removeAll(occupees);
         occupees.removeAll(anciennes);
 
@@ -37,5 +37,19 @@ public class Translation extends Mouvement{
             changements.put(c,bloc);
 
         return changements;
+    }
+
+    @Override
+    protected void deplacerBloc(){
+        bloc.setOrigine(bloc.origine().voisin(direction));
+    }
+
+    @Override
+    public boolean estValide(){
+        Set<Case> recouvertes = bloc.recouvre();
+        for(Case c : recouvertes)
+            if (!c.aVoisin(direction) || c.voisin(direction).occupant() != bloc || c.voisin(direction).occupant() != Bloc.VIDE)
+                return false;
+        return true;
     }
 }
