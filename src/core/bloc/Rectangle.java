@@ -31,7 +31,7 @@ public class Rectangle extends Forme {
                 lineHead = origine;
 
             for (int j = 0; j < longueur; j++) {
-                if (current != null)
+                if (j != 0)
                     current = current.voisin(Direction.DROITE);
                 else
                     current = lineHead;
@@ -55,7 +55,7 @@ public class Rectangle extends Forme {
                 lineHead = origine;
 
             for (int j = 0; j < longueur; j++) {
-                if (current != null) {
+                if (j != 0) {
                     if (j != longueur - 1 && !current.aVoisin(Direction.DROITE))
                         return false;
                     current = current.voisin(Direction.DROITE);

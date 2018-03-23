@@ -1,28 +1,29 @@
 package core.bloc;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import core.grille.Case;
 
 public class Bloc {
-    public static final Bloc VIDE;
+//    public static final Bloc VIDE;
     protected Forme forme;
     protected Case origine;
 
-    static {
-        VIDE = new Bloc(Forme.VIDE,null){
-            @Override
-            public int hashCode() {
-                return forme.hashCode();
-            }
-            @Override
-            public boolean equals(Object o){
-                if(!(o instanceof Bloc)) return false;
-                Bloc b = (Bloc) o;
-                return b.forme.equals(forme);
-            }
-        };
-    }
+//    static {
+//        VIDE = new Bloc(Forme.VIDE,null){
+//            @Override
+//            public int hashCode() {
+//                return forme.hashCode();
+//            }
+//            @Override
+//            public boolean equals(Object o){
+//                if(!(o instanceof Bloc)) return false;
+//                Bloc b = (Bloc) o;
+//                return b.forme.equals(forme);
+//            }
+//        };
+//    }
     public Bloc(Forme forme, Case origine){
         this.forme = forme;
         this.origine = origine;
@@ -37,6 +38,16 @@ public class Bloc {
         return forme.recouvre(origine);
     }
     public void setOrigine(Case newOrigine){
+//        Set<Case> anciennes = forme.recouvre(origine);
+//        Set<Case> nouvelles = forme.recouvre(newOrigine);
+//        Set<Case> tmp = new HashSet<>(anciennes);
+//        tmp.removeAll(nouvelles);
+//        nouvelles.removeAll(anciennes);
+//        anciennes = tmp;
+//        for(Case n : nouvelles)
+//            n.setOccupant(this);
+//        for(Case a : anciennes)
+//            a.setOccupant(new Bloc(Forme.VIDE,a));
         origine = newOrigine;
     }
     public Case origine(){
@@ -57,7 +68,7 @@ public class Bloc {
     private boolean estPositionnable(){
         Set<Case> recouvertes = recouvre();
         for(Case c : recouvertes)
-            if(c.occupant() != Bloc.VIDE && c.occupant() != this)
+            if(!c.occupant().estVide() && c.occupant() != this)
                 return false;
         return true;
     }
@@ -66,8 +77,10 @@ public class Bloc {
         if(forme.estApplicableDepuis(origine)) return false;
         Set<Case> recouvertes = forme.recouvre(origine);
         for(Case c: recouvertes)
-            if(c.occupant() != Bloc.VIDE)
-                return false;
+            return false;
         return true;
+    }
+    public boolean estVide(){
+        return forme == Forme.VIDE;
     }
 }

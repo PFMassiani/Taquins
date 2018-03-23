@@ -1,6 +1,7 @@
 package core.mouvement;
 
 import core.bloc.Bloc;
+import core.bloc.Forme;
 import core.grille.Case;
 import core.grille.Direction;
 
@@ -23,16 +24,17 @@ public class Translation extends Mouvement{
     @Override
     public Map<Case,Bloc> getChangements(){
         Set<Case> anciennes = bloc.recouvre(),
-                occupees = new HashSet<>(anciennes),
+                occupees = new HashSet<>(),
                 liberees = new HashSet<>(anciennes);
     if (!estValide()) throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
-        occupees.forEach( (Case c) -> c.voisin(direction));
+        for (Case c : anciennes)
+            occupees.add(c.voisin(direction));
         liberees.removeAll(occupees);
         occupees.removeAll(anciennes);
 
         Map<Case,Bloc> changements = new HashMap<>();
         for(Case c : liberees)
-            changements.put(c,Bloc.VIDE);
+            changements.put(c,new Bloc(Forme.VIDE,c));
         for(Case c : occupees)
             changements.put(c,bloc);
 
@@ -48,7 +50,7 @@ public class Translation extends Mouvement{
     public boolean estValide(){
         Set<Case> recouvertes = bloc.recouvre();
         for(Case c : recouvertes)
-            if (!c.aVoisin(direction) || c.voisin(direction).occupant() != bloc || c.voisin(direction).occupant() != Bloc.VIDE)
+            if (!c.aVoisin(direction) || ( !c.voisin(direction).estVide() && !c.voisin(direction).estDansLeMemeBloc(c) ) )
                 return false;
         return true;
     }

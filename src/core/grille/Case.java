@@ -4,7 +4,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 import core.bloc.Bloc;
-import core.grille.Direction;
+import core.bloc.Forme;
+
 
 public class Case{
     private static int nombreCases;
@@ -14,7 +15,6 @@ public class Case{
     }
 
     private int identifiant;
-    Case dessus,dessous,droite,gauche;
     boolean estVide = true;
     Map<Direction,Case> voisins;
     Bloc occupant;
@@ -23,11 +23,11 @@ public class Case{
         nombreCases++;
         estVide = true;
         voisins = new HashMap<Direction,Case>();
-        occupant = Bloc.VIDE;
+        occupant = new Bloc(Forme.VIDE,this);
     }
     public void setVoisin(Direction direction, Case voisin) {
         voisins.put(direction,voisin);
-        if (!voisin.voisin(direction.opposee()).equals(this))
+        if (!voisin.aVoisin(direction.opposee()) || !voisin.voisin(direction.opposee()).equals(this))
             voisin.setVoisin(direction.opposee(),this);
     }
     public Case voisin(Direction direction){
@@ -35,11 +35,11 @@ public class Case{
     }
 
     public boolean aVoisin(Direction direction){
-        return voisin(direction) == null;
+        return voisin(direction) != null;
     }
 
     public boolean estVide(){
-        return estVide;
+        return occupant.estVide();
     }
 
     public Bloc occupant() {
@@ -49,6 +49,9 @@ public class Case{
         if(nouveau == null)
             throw new IllegalArgumentException("Le bloc doit être initialisé");
         occupant = nouveau;
+    }
+    public boolean estDansLeMemeBloc(Case c){
+        return c.occupant.equals(occupant);
     }
     @Override
     public int hashCode(){

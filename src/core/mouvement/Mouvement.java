@@ -7,13 +7,12 @@ import java.util.Map;
 
 public abstract class Mouvement {
 
-    // TODO mise à jout avec le changement de la notion de Bloc
     protected Bloc bloc;
     protected Case origineBloc;
 
     public Mouvement(Bloc bloc){
         this.bloc = bloc;
-        this.origineBloc = origineBloc;
+        this.origineBloc = bloc.origine();
     }
 
     public abstract Map<Case,Bloc> getChangements();
