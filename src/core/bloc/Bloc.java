@@ -59,6 +59,10 @@ public class Bloc {
 
     @Override
     public int hashCode() {
+        if (forme == null)
+            System.out.println("Piche");
+        if (origine == null)
+            System.out.println("Piche");
         return forme.hashCode() + origine.hashCode();
     }
     @Override

@@ -27,7 +27,7 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
     GraphicCase[][] graphicCases;
 
     public FenetrePrincipale(){
-        grille = Grille.generer(Difficulte.FACILE);
+        grille = Grille.generer(Difficulte.DIFFICILE);
         Case[][] cases = grille.cases();
 
         graphicCases = new GraphicCase[DIMX][DIMY];

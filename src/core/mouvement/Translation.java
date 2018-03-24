@@ -23,7 +23,19 @@ public class Translation extends Mouvement{
         Set<Case> anciennes = bloc.recouvre(),
                 occupees = new HashSet<>(),
                 liberees = new HashSet<>(anciennes);
-        if (!estValide()) throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
+        if (!estValide())
+        {
+            System.out.println("Erreur");
+            System.out.println("Bloc:" + bloc);
+            System.out.println("De: " + bloc.origine());
+            System.out.println("Vers: " + direction);
+            System.out.print("Raison:");
+            if(!bloc.origine().aVoisin(direction)) System.out.println(" voisin inexistant");
+            else if(!bloc.origine().voisin(direction).estDansLeMemeBloc(bloc.origine())) System.out.println(" voisin occupé par " + bloc.origine().voisin(direction).occupant());
+            else System.out.println(" indéterminée");
+            throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
+        }
+
         for (Case c : anciennes)
             occupees.add(c.voisin(direction));
         liberees.removeAll(occupees);
@@ -45,6 +57,7 @@ public class Translation extends Mouvement{
 
     @Override
     public boolean estValide(){
+        if (bloc.estVide()) return false;
         Set<Case> recouvertes = bloc.recouvre();
         for(Case c : recouvertes)
             if (!c.aVoisin(direction) || ( !c.voisin(direction).estVide() && !c.voisin(direction).estDansLeMemeBloc(c) ) )
@@ -66,4 +79,13 @@ public class Translation extends Mouvement{
         return transPossibles;
 
     }
+
+//    public int hashCode(){
+//        return direction.ordinal() + bloc.hashCode();
+//    }
+//    public boolean equals(Object o){
+//        if(!(o instanceof Translation)) return false;
+//        Translation t = (Translation) o;
+//        return direction == t.direction && bloc == t.bloc;
+//    }
 }

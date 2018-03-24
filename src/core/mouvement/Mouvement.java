@@ -8,12 +8,9 @@ import java.util.Map;
 public abstract class Mouvement {
 
     protected Bloc bloc;
-    protected Case origineBloc;
 
     public Mouvement(Bloc bloc){
-        this.bloc = bloc;
-        this.origineBloc = bloc.origine();
-    }
+        this.bloc = bloc;}
 
     public abstract Map<Case,Bloc> getChangements();
     public abstract boolean estValide();
