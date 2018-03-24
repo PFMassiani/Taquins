@@ -44,11 +44,12 @@ public class Rectangle extends Forme {
 
     @Override
     public boolean estApplicableDepuis(Case origine) {
+
         if (origine == null) return false;
         Case lineHead = null, current = null;
         for (int i = 0; i < hauteur; i++) {
             if (lineHead != null) {
-                if (i != hauteur - 1 && !lineHead.aVoisin(Direction.DESSOUS))
+                if (!lineHead.aVoisin(Direction.DESSOUS))
                     return false;
                 lineHead = lineHead.voisin(Direction.DESSOUS);
             } else
@@ -56,7 +57,7 @@ public class Rectangle extends Forme {
 
             for (int j = 0; j < longueur; j++) {
                 if (j != 0) {
-                    if (j != longueur - 1 && !current.aVoisin(Direction.DROITE))
+                    if (!current.aVoisin(Direction.DROITE))
                         return false;
                     current = current.voisin(Direction.DROITE);
                 } else

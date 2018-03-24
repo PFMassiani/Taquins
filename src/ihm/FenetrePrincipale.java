@@ -2,6 +2,7 @@ package ihm;
 
 import core.bloc.Bloc;
 import core.grille.Case;
+import core.grille.Difficulte;
 import core.grille.Direction;
 import core.grille.Grille;
 import core.mouvement.Translation;
@@ -17,7 +18,7 @@ import java.util.Set;
 
 public class FenetrePrincipale extends JFrame implements MouseListener,KeyListener {
 
-    private final int DIMX = 5,DIMY = 4;
+    public static final int DIMX = 5,DIMY = 4;
 
     private Grille grille;
     private Bloc blocCourant = null;
@@ -26,7 +27,7 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
     GraphicCase[][] graphicCases;
 
     public FenetrePrincipale(){
-        grille = new Grille(DIMX,DIMY);
+        grille = Grille.generer(Difficulte.FACILE);
         Case[][] cases = grille.cases();
 
         graphicCases = new GraphicCase[DIMX][DIMY];
@@ -134,10 +135,6 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
     public void keyPressed(KeyEvent e){
         boolean fleche = false;
         Direction direction = null;
-        System.out.println("UP " + KeyEvent.VK_UP);
-        System.out.println("LEFT " + KeyEvent.VK_LEFT);
-        System.out.println("DOWN " + KeyEvent.VK_DOWN);
-        System.out.println("RIGHT " + KeyEvent.VK_RIGHT);
         if(e.getKeyCode() == KeyEvent.VK_UP){
             direction = Direction.DESSUS;
             fleche = true;

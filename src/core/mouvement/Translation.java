@@ -5,10 +5,7 @@ import core.bloc.Forme;
 import core.grille.Case;
 import core.grille.Direction;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 
 public class Translation extends Mouvement{
 
@@ -26,7 +23,7 @@ public class Translation extends Mouvement{
         Set<Case> anciennes = bloc.recouvre(),
                 occupees = new HashSet<>(),
                 liberees = new HashSet<>(anciennes);
-    if (!estValide()) throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
+        if (!estValide()) throw new UnsupportedOperationException("La position actuelle du bloc ne permet pas le mouvement demandé");
         for (Case c : anciennes)
             occupees.add(c.voisin(direction));
         liberees.removeAll(occupees);
@@ -53,5 +50,20 @@ public class Translation extends Mouvement{
             if (!c.aVoisin(direction) || ( !c.voisin(direction).estVide() && !c.voisin(direction).estDansLeMemeBloc(c) ) )
                 return false;
         return true;
+    }
+
+    public static List<Direction> translationsPossibles(Bloc bloc){
+        List<Direction> transPossibles = new LinkedList<>();
+        Set<Case> recouvre = bloc.recouvre();
+        boolean transPossible = false;
+        for(Direction direction : Direction.values()) {
+            transPossible = true;
+            for (Case c : recouvre)
+                transPossible &= c.aVoisin(direction) && (c.voisin(direction).estVide() || c.voisin(direction).estDansLeMemeBloc(c));
+            if (transPossible)
+                transPossibles.add(direction);
+        }
+        return transPossibles;
+
     }
 }

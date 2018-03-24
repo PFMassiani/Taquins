@@ -14,14 +14,12 @@ public class Case{
         nombreCases = 0;
     }
 
-    private int identifiant;
-    boolean estVide = true;
+    public int identifiant;
     Map<Direction,Case> voisins;
     Bloc occupant;
     public Case() {
         identifiant = nombreCases;
         nombreCases++;
-        estVide = true;
         voisins = new HashMap<Direction,Case>();
         occupant = new Bloc(Forme.VIDE,this);
     }

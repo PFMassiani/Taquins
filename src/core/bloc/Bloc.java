@@ -27,8 +27,11 @@ public class Bloc {
     public Bloc(Forme forme, Case origine){
         this.forme = forme;
         this.origine = origine;
-        if(!forme.estApplicableDepuis(origine) || !estPositionnable())
+        if(!forme.estApplicableDepuis(origine) || !estPositionnable()){
+            boolean test = forme.estApplicableDepuis(origine);
+            test = estPositionnable();
             throw new IllegalArgumentException("Ce bloc ne peut être créé sur cette case");
+        }
         Set<Case> recouvertes = recouvre();
         for(Case c : recouvertes)
             c.setOccupant(this);
@@ -62,14 +65,18 @@ public class Bloc {
     public boolean equals(Object o){
         if(!(o instanceof Bloc)) return false;
         Bloc b = (Bloc) o;
+        if(b == null || b.forme == null || b.origine == null || origine == null)
+            // TODO NullPointerException
+            System.out.println("Ohlalala");
         return b.forme.equals(forme) && b.origine.equals(origine);
     }
 
     private boolean estPositionnable(){
         Set<Case> recouvertes = recouvre();
-        for(Case c : recouvertes)
-            if(!c.occupant().estVide() && c.occupant() != this)
+        for(Case c : recouvertes) {
+            if (!c.occupant().estVide() && c.occupant() != this)
                 return false;
+        }
         return true;
     }
 
