@@ -14,7 +14,7 @@ public class Case{
         nombreCases = 0;
     }
 
-    public int identifiant;
+    private int identifiant;
     private Map<Direction,Case> voisins;
     private Bloc occupant;
     public Case() {
