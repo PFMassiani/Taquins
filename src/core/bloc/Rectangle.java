@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class Rectangle extends Forme {
 
-    int hauteur, longueur;
+    private int hauteur, longueur;
 
     public Rectangle(int hauteur, int longueur) {
         super();

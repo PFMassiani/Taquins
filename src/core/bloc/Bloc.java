@@ -27,11 +27,9 @@ public class Bloc {
     public Bloc(Forme forme, Case origine){
         this.forme = forme;
         this.origine = origine;
-        if(!forme.estApplicableDepuis(origine) || !estPositionnable()){
-            boolean test = forme.estApplicableDepuis(origine);
-            test = estPositionnable();
+        if(!forme.estApplicableDepuis(origine) || !estPositionnable())
             throw new IllegalArgumentException("Ce bloc ne peut être créé sur cette case");
-        }
+
         Set<Case> recouvertes = recouvre();
         for(Case c : recouvertes)
             c.setOccupant(this);
@@ -41,16 +39,6 @@ public class Bloc {
         return forme.recouvre(origine);
     }
     public void setOrigine(Case newOrigine){
-//        Set<Case> anciennes = forme.recouvre(origine);
-//        Set<Case> nouvelles = forme.recouvre(newOrigine);
-//        Set<Case> tmp = new HashSet<>(anciennes);
-//        tmp.removeAll(nouvelles);
-//        nouvelles.removeAll(anciennes);
-//        anciennes = tmp;
-//        for(Case n : nouvelles)
-//            n.setOccupant(this);
-//        for(Case a : anciennes)
-//            a.setOccupant(new Bloc(Forme.VIDE,a));
         origine = newOrigine;
     }
     public Case origine(){
@@ -59,28 +47,23 @@ public class Bloc {
 
     @Override
     public int hashCode() {
-        if (forme == null)
-            System.out.println("Piche");
-        if (origine == null)
-            System.out.println("Piche");
         return forme.hashCode() + origine.hashCode();
     }
     @Override
     public boolean equals(Object o){
         if(!(o instanceof Bloc)) return false;
         Bloc b = (Bloc) o;
-        if(b == null || b.forme == null || b.origine == null || origine == null)
-            // TODO NullPointerException
-            System.out.println("Ohlalala");
+//        if(b == null || b.forme == null || b.origine == null || origine == null)
+            // NullPointerException
         return b.forme.equals(forme) && b.origine.equals(origine);
     }
 
     private boolean estPositionnable(){
         Set<Case> recouvertes = recouvre();
-        for(Case c : recouvertes) {
+        for(Case c : recouvertes)
             if (!c.occupant().estVide() && c.occupant() != this)
                 return false;
-        }
+
         return true;
     }
 

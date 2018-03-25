@@ -9,25 +9,24 @@ import core.mouvement.Translation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FenetrePrincipale extends JFrame implements MouseListener,KeyListener {
+public class FenetrePrincipale extends JFrame implements MouseListener,KeyListener,ActionListener {
 
     public static final int DIMX = 5,DIMY = 4;
 
     private Grille grille;
     private Bloc blocCourant = null;
 
-    private JButton generer,aide,solution;
-    GraphicCase[][] graphicCases;
+    private JButton generer,solution;
+    private JComboBox<Difficulte> difficulte;
+    private JPanel panelGrille;
+    private GraphicCase[][] graphicCases;
 
     public FenetrePrincipale(){
-        grille = Grille.generer(Difficulte.DIFFICILE);
+        grille = Grille.generer(Difficulte.FACILE);
         Case[][] cases = grille.cases();
 
         graphicCases = new GraphicCase[DIMX][DIMY];
@@ -35,10 +34,32 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
             for(int j = 0; j < DIMY; j++)
                 graphicCases[i][j] = new GraphicCase(cases[i][j]);
 
+        setLayout(new BorderLayout());
 
-        JPanel panelGrille = construirePanelGrille();
-        add(panelGrille);
+        panelGrille = construirePanelGrille();
+        add(BorderLayout.CENTER,panelGrille);
 
+        generer = new JButton("Nouvelle grille");
+        difficulte = new JComboBox<>(Difficulte.values());
+        solution = new JButton("Aide");
+
+        JPanel panelGeneration = new JPanel();
+        panelGeneration.setLayout(new BorderLayout());
+        panelGeneration.add(BorderLayout.NORTH,difficulte);
+        panelGeneration.add(BorderLayout.SOUTH,generer);
+
+        JPanel boutons = new JPanel();
+        boutons.add(panelGeneration);
+        boutons.add(solution);
+
+        generer.setFocusable(false);
+        difficulte.setFocusable(false);
+        solution.setFocusable(false);
+
+        add(BorderLayout.SOUTH,boutons);
+
+        generer.addActionListener(this);
+        solution.addActionListener(this);
         addKeyListener(this);
 
         setSize(600,400);
@@ -54,7 +75,6 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
 
         //Variables pour tracer le contour
         int top,left,bottom,right;
-        boolean condTop=false,condLeft=false,condBottom=false,condRight=false;
         GraphicCase tmp;
         int offset = 11;
         for(int i = 0; i < DIMX; i++){
@@ -69,12 +89,6 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
                 constraints.ipady = GraphicCase.HAUTEUR-offset;
 
                 //Définition des bordures
-//                tmp = graphicCases[i][j].getCase();
-//                condTop = (j == 0) || ( tmp.aVoisin(Direction.DESSUS) && !tmp.estDansLeMemeBloc(tmp.voisin(Direction.DESSUS)) );
-//                condLeft = (i == 0) || ( tmp.aVoisin(Direction.GAUCHE) && !tmp.estDansLeMemeBloc(tmp.voisin(Direction.GAUCHE)) );
-//                condBottom = (j == DIMY - 1);
-//                condRight = (i == DIMX - 1);
-
                 tmp = graphicCases[i][j];
                 top = (tmp.condTop()) ? GraphicCase.LARGEUR_LIGNE : 0;
                 left = (tmp.condLeft()) ? GraphicCase.LARGEUR_LIGNE : 0;
@@ -100,10 +114,15 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
             gcasesDansMemeBloc.add(getGraphicCaseFromCase(c));
 
         for(GraphicCase gc : gcasesDansMemeBloc)
-            gc.setSurbrillance(valeur);
+            if (gc != null)
+                gc.setSurbrillance(valeur);
     }
 
     public GraphicCase getGraphicCaseFromCase(Case c){
+        for(int i = 0; i< DIMX; i++)
+            for(int j = 0; j<DIMY; j++)
+                if(graphicCases[i][j].getCase().equals(c))
+                    return graphicCases[i][j];
         for(int i = 0; i< DIMX; i++)
             for(int j = 0; j<DIMY; j++)
                 if(graphicCases[i][j].getCase().equals(c))
@@ -154,7 +173,7 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
 
         if (fleche && blocCourant != null){
             setSurbrillance(blocCourant,false);
-            grille.effectuerMouvement(new Translation(direction,blocCourant));
+            grille.effectuerMouvementUtilisateur(new Translation(direction,blocCourant));
             setSurbrillance(blocCourant,true);
             repaint();
         }
@@ -163,6 +182,38 @@ public class FenetrePrincipale extends JFrame implements MouseListener,KeyListen
     public void keyReleased(KeyEvent e){}
     @Override
     public void keyTyped(KeyEvent e){}
+    @Override
+    public void actionPerformed(ActionEvent e){
+        if(e.getSource() == generer){
+            Difficulte diff = difficulte.getItemAt(difficulte.getSelectedIndex());
+            grille = Grille.generer(diff);
+            Case[][] cases = grille.cases();
+            for(int i = 0; i < DIMX; i++) {
+                for (int j = 0; j < DIMY; j++) {
+                    graphicCases[i][j].setCase(cases[i][j]);
+                    graphicCases[i][j].setSurbrillance(false);
+                }
+            }
+            JPanel tmp = construirePanelGrille();
+            remove(panelGrille);
+            panelGrille = tmp;
+            add(BorderLayout.CENTER,panelGrille);
+            repaint();
+        }
+        else if(e.getSource() == solution){
+            int confirme = JOptionPane.YES_OPTION;
+            if (grille.utilisateurAAgi())
+                confirme = JOptionPane.showConfirmDialog (null, "Attention: cette action réinitialisera la grille. Continuer ?","Confirmation",JOptionPane.YES_NO_OPTION);
+            if(confirme == JOptionPane.YES_OPTION){
+                if(blocCourant != null)
+                    setSurbrillance(blocCourant,false);
+                blocCourant = grille.resoudreUneEtape();
+                setSurbrillance(blocCourant,true);
+            }
+//                while(!grille.resolutionFinie())
+//                    grille.resoudreUneEtape();
+        }
+    }
 
     public static void main(String[] args){
         FenetrePrincipale fen = new FenetrePrincipale();

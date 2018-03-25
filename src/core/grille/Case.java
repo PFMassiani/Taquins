@@ -15,8 +15,8 @@ public class Case{
     }
 
     public int identifiant;
-    Map<Direction,Case> voisins;
-    Bloc occupant;
+    private Map<Direction,Case> voisins;
+    private Bloc occupant;
     public Case() {
         identifiant = nombreCases;
         nombreCases++;

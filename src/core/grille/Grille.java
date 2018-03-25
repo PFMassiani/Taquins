@@ -11,7 +11,7 @@ import java.util.*;
 
 public class Grille {
     private Case[][] cases;
-
+    private Stack<Mouvement> solution, mouvementsUtilisateur;
     private static final Random RANDOM = new Random();
     private static final List<Direction> DIRECTIONS =
             Collections.unmodifiableList(Arrays.asList(Direction.values()));
@@ -19,6 +19,8 @@ public class Grille {
 
     public Grille(int dimX, int dimY){
         cases = new Case[dimX][dimY];
+        solution = new Stack<>();
+        mouvementsUtilisateur = new Stack<>();
         for(int i = 0; i < dimX; i++)
             for (int j = 0; j < dimY; j++)
                 cases[i][j] = new Case();
@@ -30,14 +32,28 @@ public class Grille {
                 if(j<dimY - 1) cases[i][j].setVoisin(Direction.DESSOUS, cases[i][j+1]);
             }
         }
-//        Bloc test1 = new Bloc(new Rectangle(2,2),cases[0][0]);
-//        Bloc test2 = new Bloc(new Rectangle(1,1),cases[2][0]);
-
-
     }
-    public List<Mouvement> resoudre(){
-        // TODO
-        return new LinkedList<Mouvement>();
+    public Bloc resoudreUneEtape(){
+        Mouvement mvmt;
+        if(!mouvementsUtilisateur.empty()) {
+//            System.out.println("Utilisateur a effectué des mouvements:" + mouvementsUtilisateur.size());
+            while (!mouvementsUtilisateur.empty()){
+                mvmt = mouvementsUtilisateur.pop();
+                System.out.println("Mouvement:" + mvmt);
+                if(mvmt.annulationEstValide()) annulerMouvement(mvmt);
+            }
+//            System.out.println("Fin d'annulation des mouvements utilisateur");
+        }
+        mvmt = solution.pop();
+//        System.out.println("Mouvement automatique : " + mvmt);
+//        System.out.println("Bloc : "+mvmt.bloc);
+//        System.out.println("Origine bloc : " + mvmt.bloc.origine());
+//        System.out.println("Occupant origine : " + mvmt.bloc.origine().occupant());
+//        System.out.println("Direction originelle :" + ((Translation) mvmt).direction);
+//        System.out.println("Annulation est valide: " + mvmt.annulationEstValide());
+        Bloc bouge = mvmt.getBloc();
+        if(mvmt.annulationEstValide()) annulerMouvement(mvmt);
+        return bouge;
     }
     public static Grille generer(Difficulte difficulte){
         int dimX = FenetrePrincipale.DIMX,dimY = FenetrePrincipale.DIMY;
@@ -70,7 +86,7 @@ public class Grille {
         Case tmp;
         Bloc b;
         List<Forme> possibilites;
-        Forme choicForme;
+        Forme choixForme;
         while (!casesARemplir.isEmpty()){;
             tmp = casesARemplir.get(0);
             possibilites = new ArrayList<>();
@@ -78,13 +94,13 @@ public class Grille {
             possibilites.add(f1x2);
             possibilites.add(f2x1);
 
-            choicForme = possibilites.get(RANDOM.nextInt(possibilites.size()));
-            while(!choicForme.estApplicableDepuis(tmp) || !estInclus(choicForme.recouvre(tmp),casesARemplir)){//!intersectionEstVide(casesTampon,choix.recouvre(tmp)) || !intersectionEstVide(carre.recouvre(),choix.recouvre(tmp))){
-                possibilites.remove(choicForme);
-                choicForme = possibilites.get(RANDOM.nextInt(possibilites.size()));
+            choixForme = possibilites.get(RANDOM.nextInt(possibilites.size()));
+            while(!choixForme.estApplicableDepuis(tmp) || !estInclus(choixForme.recouvre(tmp),casesARemplir)){//!intersectionEstVide(casesTampon,choix.recouvre(tmp)) || !intersectionEstVide(carre.recouvre(),choix.recouvre(tmp))){
+                possibilites.remove(choixForme);
+                choixForme = possibilites.get(RANDOM.nextInt(possibilites.size()));
             }
 
-            b = new Bloc(choicForme,tmp);
+            b = new Bloc(choixForme,tmp);
 
             casesARemplir.removeAll(b.recouvre());
         }
@@ -104,44 +120,9 @@ public class Grille {
             choixMvmt = elementSetAleatoire(mouvements);
 
             //Application du mouvement
-            grille.effectuerMouvement(choixMvmt);
-//
-//            //Détermination des blocs déplaçables
-//            for (Case[] line : grille.cases) {
-//                for (Case c : line) {
-//                    translations = Translation.translationsPossibles(c.occupant());
-//                    if (!translations.isEmpty())
-//                        mouvements.put(c.occupant(), translations);
-//                }
-//            }
-//
-//            //Sélection aléatoire de la translation
-//            numEntry = RANDOM.nextInt(mouvements.size());
-//            for(Map.Entry<Bloc,List<Direction>> entry : mouvements.entrySet()){
-//                if (n == numEntry){
-//                    choisi = entry.getKey();
-//                    translations = entry.getValue();
-//                    dir = translations.get(RANDOM.nextInt(translations.size()));
-//                    break;
-//                }
-//                n++;
-//            }
-//
-//            //Maintenant qu'on a sélectionné un bloc, on le bouge aléatoirement
-//            trans = genererTranslationAleatoire(choisi);
-//            if(trans != null)
-//                grille.effectuerMouvement(trans);
+            grille.effectuerMouvementAutomatique(choixMvmt);
         }
-
-        // TODO FINIR GÉNÉRER GRILLE
-
-
         return grille;
-    }
-    private static boolean intersectionEstVide(Collection<Case> c1, Collection<Case> c2){
-        Collection<Case> c3 = new HashSet<>(c1);
-        boolean res = c3.removeAll(c2);
-        return !res;
     }
     private static boolean estInclus(Collection<Case> c1, Collection<Case> c2){
         Collection<Case> c3 = new HashSet<>(c1);
@@ -157,9 +138,6 @@ public class Grille {
             direction = directionsPossibles.get(RANDOM.nextInt(directionsPossibles.size()));
             translation = new Translation(direction,bloc);
             if(translation.estValide()) {
-//                System.out.println("" + translation);
-//                System.out.println("Check validité 0 :" + translation.estValide());
-//                translation.appliquer();
                 return translation;
             }
             directionsPossibles.remove(direction);
@@ -178,99 +156,22 @@ public class Grille {
         return (it.hasNext()) ? it.next() : null;
     }
 
-    public void effectuerMouvement(Mouvement mvmt){
+    public void effectuerMouvementAutomatique(Mouvement mvmt){
         mvmt.appliquer();
+        solution.push(mvmt);
+    }
+    public void effectuerMouvementUtilisateur(Mouvement mvmt){
+        mvmt.appliquer();
+        mouvementsUtilisateur.push(mvmt);
+    }
+    public void annulerMouvement(Mouvement mvmt){
+        mvmt.annuler();
+    }
+    public boolean utilisateurAAgi(){
+        return !mouvementsUtilisateur.empty();
     }
 
     public Case[][] cases(){
         return cases;
-    }
-    private static int n=0;
-    public static void testGenerationTranslationAleatoire(Grille g){
-        Set<Mouvement> mouvements;
-        Mouvement mvmt;
-        for(int i = 0; i < 100; i++){
-            mouvements = new HashSet<>();
-            System.out.println("Début première phase test");
-            for(Case[] ligne : g.cases) {
-                for (Case c : ligne) {
-                    if ((mvmt = Grille.genererTranslationAleatoire(c.occupant())) != null) {
-                        mouvements.add(mvmt);
-                        System.out.println("valide:"+mvmt.estValide());
-                    }
-                }
-            }
-            System.out.println("Fin première phase test");
-            for(Mouvement m:mouvements)
-                System.out.println("valide:" + m.estValide());
-            System.out.println("Fin deuxième phase test");
-            mvmt = elementSetAleatoire(mouvements);
-            for(Mouvement m:mouvements)
-                System.out.println("valide:" + m.estValide());
-            System.out.println("Fin troisième phase test");
-            if (mvmt != null){
-                System.out.println("Non null");
-                if (!mvmt.estValide()) {
-                    mvmt.estValide();
-                    System.out.println("mvmt invalide");
-                }
-                mvmt.appliquer();
-                n++;
-            }
-        }
-//
-//        Translation t1 = genererTranslationAleatoire(b1),
-//                t2,
-//                t3;
-//        System.out.println("Positions:\n 1: " + g.position(b1)[0] + "" + g.position(b1)[1] + "\n 2:" + g.position(b2)[0] + "" + g.position(b2)[1]  + "\n 3:" + g.position(b3)[0] + "" + g.position(b3)[1]);
-//
-//        if (t1 != null){
-//            System.out.print("t1 ");
-//            if (!t1.estValide())
-//                System.out.println("Erreur t1");
-//            t1.appliquer();
-//            n1++;
-//        }
-//        t2 = genererTranslationAleatoire(b2);
-//        if (t2 != null){
-//            System.out.print("t2 ");
-//            if (!t2.estValide())
-//                System.out.println("Erreur t2");
-//            t2.appliquer();
-//            n2++;
-//        }
-//        t3 = genererTranslationAleatoire(b3);
-//        if (t3 != null){
-//            System.out.print("t3 ");
-//            if (!t3.estValide())
-//                System.out.println("Erreur t3");
-//            t3.appliquer();
-//            n3++;
-//        }
-        //        System.out.println("n1 = " + n1 + ", n2 = " + n2 + ", n3 = " + n3);
-    }
-
-    private int[] position(Bloc b){
-        int dimX = cases.length;
-        int dimY = cases[0].length;
-        for(int i = 0; i<dimX; i++) {
-            for (int j = 0; j<dimY; j++) {
-                if (cases[i][j].occupant() == b)
-                    return new int[] {i,j};
-            }
-        }
-        return null;
-    }
-
-    public static void main(String[] args){
-        System.out.println("Début test");
-        Grille g = new Grille(2,2);
-        Rectangle r = new Rectangle(1,1);
-        Bloc b1 = new Bloc(r,g.cases[0][0]),
-                b2 = new Bloc(r,g.cases[1][0]),
-                b3 = new Bloc(r,g.cases[0][1]);
-        Grille.testGenerationTranslationAleatoire(g);
-
-        System.out.println("Test terminé");
     }
 }
